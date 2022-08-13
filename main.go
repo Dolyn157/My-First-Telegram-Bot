@@ -121,27 +121,9 @@ func weatherProcess(update tgbotapi.Update) string {
 
 	var wd model.WeaData
 	data := wd.ApiGetData(reqUrl)
-	//fmt.Printf("%s \n", data)
+
 	wd.ParseData(data)
 
 	returnText := fmt.Sprintf("%v近1小时天气：  %s , 温度: %.2f℃, 体感: %.2f℃, 湿度: %s％，压力：%s Hpa，风速: %s 米/秒 ", cityText, wd.Des, wd.Tempo, wd.Feels_Like, wd.Humidity, wd.Pressure, wd.WindSpeed)
 	return returnText
 }
-
-/* for update := range updates {
-	if update.Message != nil { // If we got a message
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-		if update.Message.Text == "我爱你" {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, `我也爱你哦 ヽ(✿ﾟ▽ﾟ)ノ `)
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
-		} else {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
-		}
-
-	}
-}
-*/
