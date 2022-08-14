@@ -15,7 +15,7 @@ const replylogDst = "./logs2"
 func main() {
 	utils.LogGenerator(replylogDst, "\n----------------------------\n")
 
-	bot1, err := tgbotapi.NewBotAPI("填写你的TG Bot Apikey") //
+	bot1, err := tgbotapi.NewBotAPI("5345811064:AAHn4LFQAH7HtPJipaLXczEwKJ4FN5hT36M") //  5414999249:AAFdn_qLdeHSE4e_n4jMS-CqwOblUWFZrYs  5345811064:AAHn4LFQAH7HtPJipaLXczEwKJ4FN5hT36M
 	if err != nil {
 		log.Panic(err)
 	}
@@ -38,7 +38,7 @@ func processControl(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if update.Message.Text[0] == 47 && update.Message.From.IsBot == false {
 		if update.Message.ReplyToMessage == nil {
 			if update.Message.Text == "/help@Gwyndolyn_bot" {
-				rText := "天气报告 输入/ 城市名称 可以查询近1小时的基本天气情况，目前支持 曼谷 伦敦 大阪 马尼拉 上海 湛江。 API : OpenWeatherMap"
+				rText := "天气报告 输入/ 城市名称 可以查询近1小时的基本天气情况，目前支持 曼谷 伦敦 大阪 京都 马尼拉 上海 湛江 广州。 API : OpenWeatherMap"
 
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
 				msg.ReplyToMessageID = update.Message.MessageID
@@ -84,46 +84,33 @@ func replyProcess(update tgbotapi.Update) string {
 }
 
 func weatherProcess(update tgbotapi.Update) string {
-	const apiKey string = "appid=填写你的 openweathermap Apikey"
+	const apiKey string = "appid=269a3150c6e4881b7207ab6326435688"
 	const apiUrl string = "https://api.openweathermap.org/data/2.5/weather?q="
-	var cityName string
 	var cityText = strings.TrimPrefix(update.Message.Text, "/")
 	var reqUrl string
 
-	switch cityText {
-	case "曼谷":
-		cityName = "Bangkok"
-		reqUrl = apiUrl + cityName + "&" + "lang=zh_cn" + "&" + apiKey
-
-	case "伦敦":
-		cityName = "London"
-		reqUrl = apiUrl + cityName + "&" + "lang=zh_cn" + "&" + apiKey
-
-	case "马尼拉":
-		cityName = "Manila"
-		reqUrl = apiUrl + cityName + "&" + "lang=zh_cn" + "&" + apiKey
-
-	case "大阪":
-		cityName = "Osaka"
-		reqUrl = apiUrl + cityName + "&" + "lang=zh_cn" + "&" + apiKey
-
-	case "上海":
-		cityName = "Shanghai"
-		reqUrl = apiUrl + cityName + "&" + "lang=zh_cn" + "&" + apiKey
-
-	case "湛江":
-		cityName = "Zhanjiang"
-		reqUrl = apiUrl + cityName + "&" + "lang=zh_cn" + "&" + apiKey
-
-	default:
-		return "nil"
+	mcityNames := map[string]string{
+		"曼谷":  "Bangkok",
+		"马尼拉": "Manila",
+		"大阪":  "Osaka",
+		"京都":  "Kyoto",
+		"伦敦":  "London",
+		"上海":  "Shanghai",
+		"湛江":  "Zhanjiang",
+		"广州":  "Guangzhou",
 	}
 
 	var wd model.WeaData
+	var returnText string
+	reqUrl = apiUrl + mcityNames[cityText] + "&" + "lang=zh_cn" + "&" + apiKey
 	data := wd.ApiGetData(reqUrl)
-
 	wd.ParseData(data)
 
-	returnText := fmt.Sprintf("%v近1小时天气：  %s , 温度: %.2f℃, 体感: %.2f℃, 湿度: %s％，压力：%s Hpa，风速: %s 米/秒 ", cityText, wd.Des, wd.Tempo, wd.Feels_Like, wd.Humidity, wd.Pressure, wd.WindSpeed)
+	if wd.ErrMsg == "400" { //利用天气 Api 给我们返回的404信息来通知用户城市是否找到。
+		returnText = "未找到您输入的城市或程序还未做名称映射。"
+	} else {
+		returnText = fmt.Sprintf("%v近1小时天气：  %s , 温度: %.2f℃, 体感: %.2f℃, 湿度: %s％，压力：%s Hpa，风速: %s 米/秒 ", cityText, wd.Des, wd.Tempo, wd.Feels_Like, wd.Humidity, wd.Pressure, wd.WindSpeed)
+	}
+	fmt.Println("错误代码", wd.ErrMsg)
 	return returnText
 }

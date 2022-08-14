@@ -16,6 +16,7 @@ type WeaData struct {
 	Pressure   string
 	Humidity   string
 	WindSpeed  string
+	ErrMsg     string
 }
 
 func (Wd *WeaData) ApiGetData(apiUrl string) []byte {
@@ -34,16 +35,12 @@ func (Wd *WeaData) ParseData(data []byte) {
 	//weather
 
 	Wd.Des, _ = jsonparser.GetString(data, "weather", "[0]", "description")
-
-	Tempo, _, _, _ := jsonparser.Get(data, "main", "temp") //气温
-
+	Tempo, _, _, _ := jsonparser.Get(data, "main", "temp")            //气温
 	Feels_Like, _, _, _ := jsonparser.Get(data, "main", "feels_like") //体感
-
-	Pressure, _, _, _ := jsonparser.Get(data, "main", "pressure") //气压 hpa
-
-	Humidity, _, _, _ := jsonparser.Get(data, "main", "humidity") //湿度 hpa
-
-	WindSpeed, _, _, _ := jsonparser.Get(data, "wind", "speed") // 风速
+	Pressure, _, _, _ := jsonparser.Get(data, "main", "pressure")     //气压 hpa
+	Humidity, _, _, _ := jsonparser.Get(data, "main", "humidity")     //湿度 hpa
+	WindSpeed, _, _, _ := jsonparser.Get(data, "wind", "speed")       // 风速
+	errMsg, _, _, _ := jsonparser.Get(data, "cod")
 
 	strTempo := string(Tempo)
 	strFeels := string(Feels_Like)
@@ -55,7 +52,6 @@ func (Wd *WeaData) ParseData(data []byte) {
 	Wd.WindSpeed = string(WindSpeed)
 
 	Wd.Tempo = Wd.Tempo - 273.15
-
 	Wd.Feels_Like = Wd.Feels_Like - 273.15
-
+	Wd.ErrMsg = string(errMsg)
 }
