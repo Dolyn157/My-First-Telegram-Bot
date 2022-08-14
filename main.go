@@ -15,7 +15,7 @@ const replylogDst = "./logs2"
 func main() {
 	utils.LogGenerator(replylogDst, "\n----------------------------\n")
 
-	bot1, err := tgbotapi.NewBotAPI("5345811064:AAHn4LFQAH7HtPJipaLXczEwKJ4FN5hT36M") //  5414999249:AAFdn_qLdeHSE4e_n4jMS-CqwOblUWFZrYs  5345811064:AAHn4LFQAH7HtPJipaLXczEwKJ4FN5hT36M
+	bot1, err := tgbotapi.NewBotAPI("你的botAPikey") //
 	if err != nil {
 		log.Panic(err)
 	}
@@ -84,7 +84,7 @@ func replyProcess(update tgbotapi.Update) string {
 }
 
 func weatherProcess(update tgbotapi.Update) string {
-	const apiKey string = "appid=269a3150c6e4881b7207ab6326435688"
+	const apiKey string = "appid=你的天气apikey"
 	const apiUrl string = "https://api.openweathermap.org/data/2.5/weather?q="
 	var cityText = strings.TrimPrefix(update.Message.Text, "/")
 	var reqUrl string
