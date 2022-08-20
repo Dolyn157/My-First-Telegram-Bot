@@ -10,12 +10,12 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-const replylogDst = "./logs2"
+const replylogDst = "./msgs"
 
 func main() {
 	utils.LogGenerator(replylogDst, "\n----------------------------\n")
 
-	bot1, err := tgbotapi.NewBotAPI("你的botAPikey") //
+	bot1, err := tgbotapi.NewBotAPI("") //  你的 BOT APIID
 	if err != nil {
 		log.Panic(err)
 	}
@@ -25,51 +25,55 @@ func main() {
 	//log.Printf("Authorized on account %s", bot1.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
+	u.Timeout = 120
 
 	updates := bot1.GetUpdatesChan(u)
 
 	for update := range updates {
+		if update.Message == nil {
+			continue
+		}
+
 		processControl(update, bot1)
 	}
 }
 
 func processControl(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	if update.Message.Text[0] == 47 && update.Message.From.IsBot == false {
-		if update.Message.ReplyToMessage == nil {
-			if update.Message.Text == "/help@Gwyndolyn_bot" {
-				rText := "天气报告 输入/ 城市名称 可以查询近1小时的基本天气情况，目前支持 曼谷 伦敦 大阪 京都 马尼拉 上海 湛江 广州。 API : OpenWeatherMap"
-
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
-				msg.ReplyToMessageID = update.Message.MessageID
-				bot.Send(msg)
-
-			} else {
-				rText := weatherProcess(update)
-
-				if rText == "nil" {
-
-				} else {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
-					msg.ReplyToMessageID = update.Message.MessageID
-					bot.Send(msg)
-
-				}
-
-			}
-		} else if update.Message.ReplyToMessage != nil {
-			rText := replyProcess(update)
-
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
-
-		}
-		//记录 Bot Api 的返回Json 数据
-		str := utils.SprintJSON(update) + "\n\n"
-		utils.LogGenerator(replylogDst, str)
+	if !strings.HasPrefix(update.Message.Text, "/") {
+		return
 	}
+	if update.Message.From.IsBot {
+		return
+	}
+	if update.Message.ReplyToMessage != nil {
+		return
+	}
+	if update.Message.Text == "/help@Gwyndolyn_bot" {
+		rText := "天气报告 输入/ 城市名称 可以查询近1小时的基本天气情况，目前支持 曼谷 伦敦 大阪 京都 马尼拉 上海 湛江 广州。 API : OpenWeatherMap"
 
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
+		msg.ReplyToMessageID = update.Message.MessageID
+		bot.Send(msg)
+
+	} else {
+		rText := weatherProcess(update)
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
+		msg.ReplyToMessageID = update.Message.MessageID
+		bot.Send(msg)
+
+	}
+	if update.Message.ReplyToMessage != nil {
+		rText := replyProcess(update)
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
+		msg.ReplyToMessageID = update.Message.MessageID
+		bot.Send(msg)
+
+	}
+	//记录 Bot Api 的返回Json 数据
+	str := utils.SprintJSON(update) + "\n\n"
+	utils.LogGenerator(replylogDst, str)
 }
 
 func replyProcess(update tgbotapi.Update) string {
@@ -84,7 +88,7 @@ func replyProcess(update tgbotapi.Update) string {
 }
 
 func weatherProcess(update tgbotapi.Update) string {
-	const apiKey string = "appid=你的天气apikey"
+	const apiKey string = "appid=" //你的气象APIID
 	const apiUrl string = "https://api.openweathermap.org/data/2.5/weather?q="
 	var cityText = strings.TrimPrefix(update.Message.Text, "/")
 	var reqUrl string
