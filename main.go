@@ -15,7 +15,7 @@ const replylogDst = "./msgs"
 func main() {
 	utils.LogGenerator(replylogDst, "\n----------------------------\n")
 
-	bot1, err := tgbotapi.NewBotAPI("") //  你的 BOT APIID
+	bot1, err := tgbotapi.NewBotAPI("5345811064:AAHn4LFQAH7HtPJipaLXczEwKJ4FN5hT36M", "") //  5414999249:AAFdn_qLdeHSE4e_n4jMS-CqwOblUWFZrYs  5345811064:AAHn4LFQAH7HtPJipaLXczEwKJ4FN5hT36M
 	if err != nil {
 		log.Panic(err)
 	}
@@ -45,9 +45,6 @@ func processControl(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if update.Message.From.IsBot {
 		return
 	}
-	if update.Message.ReplyToMessage != nil {
-		return
-	}
 	if update.Message.Text == "/help@Gwyndolyn_bot" {
 		rText := "天气报告 输入/ 城市名称 可以查询近1小时的基本天气情况，目前支持 曼谷 伦敦 大阪 京都 马尼拉 上海 湛江 广州。 API : OpenWeatherMap"
 
@@ -55,22 +52,22 @@ func processControl(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		msg.ReplyToMessageID = update.Message.MessageID
 		bot.Send(msg)
 
-	} else {
-		rText := weatherProcess(update)
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
-		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
-
-	}
-	if update.Message.ReplyToMessage != nil {
+	} else if update.Message.ReplyToMessage != nil {
 		rText := replyProcess(update)
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
 		msg.ReplyToMessageID = update.Message.MessageID
 		bot.Send(msg)
 
+	} else {
+
+		rText := weatherProcess(update)
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, rText)
+		msg.ReplyToMessageID = update.Message.MessageID
+		bot.Send(msg)
 	}
+
 	//记录 Bot Api 的返回Json 数据
 	str := utils.SprintJSON(update) + "\n\n"
 	utils.LogGenerator(replylogDst, str)
@@ -88,7 +85,7 @@ func replyProcess(update tgbotapi.Update) string {
 }
 
 func weatherProcess(update tgbotapi.Update) string {
-	const apiKey string = "appid=" //你的气象APIID
+	const apiKey string = "appid=269a3150c6e4881b7207ab6326435688"
 	const apiUrl string = "https://api.openweathermap.org/data/2.5/weather?q="
 	var cityText = strings.TrimPrefix(update.Message.Text, "/")
 	var reqUrl string
